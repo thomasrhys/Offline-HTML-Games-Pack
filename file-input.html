@@ -11,6 +11,7 @@ body{
   margin:0;
   font-family:sans-serif;
   overflow:hidden;
+  background:#fff;
 }
 
 #panel{
@@ -63,16 +64,18 @@ iframe{
   width:100vw;
   height:100vh;
   border:none;
+  background:white;
 }
 
 #fullscreen-btn{
   position:fixed;
   top:5px;
   left:5px;
-  width:15px;
-  height:15px;
+  width:22px;
+  height:22px;
   border:none;
-  font-size:10px;
+  border-radius:4px;
+  font-size:11px;
   cursor:pointer;
   z-index:9999;
   display:none;
@@ -111,9 +114,8 @@ var htmlInput = document.getElementById("html-input");
 var runButton = document.getElementById("run-html");
 var fullscreenBtn = document.getElementById("fullscreen-btn");
 
-var fullscreenTarget = iframe;
-
 function renderHTML(html) {
+
   htmlInput.value = '';
 
   try {
@@ -122,7 +124,6 @@ function renderHTML(html) {
       iframe.contentDocument ||
       iframe.contentWindow.document;
 
-    
     doc.open();
     doc.write(html);
     doc.close();
@@ -130,35 +131,18 @@ function renderHTML(html) {
   } catch(err) {
 
     console.log(
-      "Iframe restricted, using srcdoc fallback"
+      "doc.write failed, using srcdoc fallback"
     );
 
-     
     iframe.srcdoc = html;
   }
 
   panel.style.display = "none";
   fullscreenBtn.style.display = "block";
-
-  fullscreenTarget = iframe;
-
-  try {
-
-    var iframeDoc =
-      iframe.contentDocument ||
-      iframe.contentWindow.document;
-
-    if (iframeDoc && iframeDoc.documentElement) {
-      fullscreenTarget = iframeDoc.documentElement;
-    }
-
-  } catch(err) {
-
-    fullscreenTarget = document.documentElement;
-  }
 }
 
 function loadFile(file) {
+
   if (!file) return;
 
   var reader = new FileReader();
@@ -170,59 +154,66 @@ function loadFile(file) {
   reader.readAsText(file);
 }
 
-dropArea.addEventListener("click", () => {
+dropArea.addEventListener("click", function() {
   fileInput.click();
 });
 
-fileInput.addEventListener("change", e => {
+fileInput.addEventListener("change", function(e) {
   loadFile(e.target.files[0]);
 });
 
-dropArea.addEventListener("dragover", e => {
+dropArea.addEventListener("dragover", function(e) {
   e.preventDefault();
   dropArea.classList.add("drag");
 });
 
-dropArea.addEventListener("dragleave", () => {
+dropArea.addEventListener("dragleave", function() {
   dropArea.classList.remove("drag");
 });
 
-dropArea.addEventListener("drop", e => {
+dropArea.addEventListener("drop", function(e) {
+
   e.preventDefault();
+
   dropArea.classList.remove("drag");
 
   var file = e.dataTransfer.files[0];
+
   loadFile(file);
 });
 
-runButton.addEventListener("click", () => {
+runButton.addEventListener("click", function() {
   renderHTML(htmlInput.value);
 });
 
-fullscreenBtn.addEventListener("click", async () => {
+fullscreenBtn.addEventListener("click", async function() {
 
   try {
 
-    if (fullscreenTarget.requestFullscreen) {
-      await fullscreenTarget.requestFullscreen();
+    if (iframe.requestFullscreen) {
 
-    } else if (fullscreenTarget.webkitRequestFullscreen) {
-      fullscreenTarget.webkitRequestFullscreen();
+      await iframe.requestFullscreen();
 
-    } else if (fullscreenTarget.msRequestFullscreen) {
-      fullscreenTarget.msRequestFullscreen();
+    } else if (iframe.webkitRequestFullscreen) {
+
+      iframe.webkitRequestFullscreen();
+
+    } else if (iframe.msRequestFullscreen) {
+
+      iframe.msRequestFullscreen();
+
+    } else {
+
+      console.log("Fullscreen API not supported");
+
     }
 
   } catch(err) {
 
-    console.error(err);
-
-     
-    try {
-      await document.documentElement.requestFullscreen();
-    } catch(e) {
-      console.error(e);
-    }
+    console.error(
+      "Fullscreen failed:",
+      err
+    );
 
   }
 
