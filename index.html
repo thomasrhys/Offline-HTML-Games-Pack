@@ -3,171 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Arcade</title>
+    <title>ThomasRhys Ultimate Arcade</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            text-align: center;
-            margin: 0;
-            padding: 40px 20px;
-        }
-        h1 {
-            color: #00ffcc;
-            font-size: 2.5rem;
-            margin-bottom: 5px;
-            text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
-        }
-        h2 {
-            color: #ff9900;
-            text-align: left;
-            max-width: 1200px;
-            margin: 30px auto 15px auto;
-            font-size: 1.5rem;
-            border-bottom: 2px solid #333;
-            padding-bottom: 5px;
-        }
-        .subtitle {
-            color: #a0a0a0;
-            margin-bottom: 30px;
-        }
-        #search-bar {
-            width: 90%;
-            max-width: 500px;
-            padding: 12px 20px;
-            margin-bottom: 20px;
-            border-radius: 25px;
-            border: 1px solid #333;
-            background-color: #1e1e1e;
-            color: #fff;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        #search-bar:focus {
-            border-color: #00ffcc;
-        }
-        .game-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .game-card {
-            background: linear-gradient(145deg, #1e1e1e, #252525);
-            padding: 25px 15px;
-            border-radius: 12px;
-            text-decoration: none;
-            color: #fff;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            border: 1px solid #333;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 90px;
-            box-sizing: border-box;
-        }
-        .game-card:hover {
-            transform: translateY(-3px);
-            border-color: #00ffcc;
-            background: #252525;
-            color: #00ffcc;
-        }
-        .play-count {
-            font-size: 0.75rem;
-            color: #888;
-            margin-top: 8px;
-            font-weight: normal;
-        }
-        #most-played-section, #all-games-section {
-            display: none;
-        }
-        .loading {
-            font-size: 1.2rem;
-            color: #a0a0a0;
-            margin-top: 40px;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #121212; color: #e0e0e0; text-align: center; margin: 0; padding: 40px 20px; }
+        h1 { color: #00ffcc; font-size: 2.5rem; margin-bottom: 5px; }
+        h2 { color: #ff9900; text-align: left; max-width: 1200px; margin: 30px auto 15px auto; font-size: 1.5rem; border-bottom: 2px solid #333; padding-bottom: 5px; }
+        #search-bar { width: 90%; max-width: 500px; padding: 12px 20px; margin-bottom: 20px; border-radius: 25px; border: 1px solid #333; background-color: #1e1e1e; color: #fff; font-size: 1rem; outline: none; }
+        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; max-width: 1200px; margin: 0 auto; }
+        .game-card { background: #1e1e1e; padding: 25px 15px; border-radius: 12px; text-decoration: none; color: #fff; font-weight: 600; transition: 0.2s; border: 1px solid #333; display: flex; flex-direction: column; justify-content: center; height: 90px; box-sizing: border-box; }
+        .game-card:hover { border-color: #00ffcc; color: #00ffcc; transform: translateY(-2px); }
+        .play-count { font-size: 0.75rem; color: #888; margin-top: 8px; }
+        #most-played-section { display: none; }
     </style>
 </head>
 <body>
 
     <h1>🕹️ Ultimate Web Arcade</h1>
-    <p class="subtitle">Search and play 300+ standalone games directly in your browser.</p>
+    <p style="color:#a0a0a0;">Search and play 300+ offline games directly in your browser.</p>
+    <input type="text" id="search-bar" placeholder="🔍 Search games..." onkeyup="filterGames()">
 
-    <input type="text" id="search-bar" placeholder="🔍 Search all games..." onkeyup="filterGames()">
-
-    <!-- Pinned Favorites -->
     <div id="most-played-section">
         <h2>🔥 Most Played</h2>
         <div class="game-grid" id="most-played-grid"></div>
     </div>
 
-    <!-- Main Game Catalog -->
-    <div id="all-games-section">
-        <h2>🎮 All Games</h2>
-        <div class="game-grid" id="all-games-grid"></div>
-    </div>
-
-    <div id="loading-text" class="loading">🔄 Scanning your game vault...</div>
+    <h2>🎮 All Games</h2>
+    <div class="game-grid" id="all-games-grid"></div>
 
     <script>
-        const username = "thomasrhys";
-        const repoName = "Offline-HTML-Games-Pack";
+        const rawGamesData = "100balls,1v1.lol,2048,2048cupcakes,21,3d-car-simulator,3d-darts,3d-free-kick,3d-moto-simulator-2,4colors,99balls,achilles,adventure-drivers,adventure-miner,ageofwar,ageofwar2,amongus,angrybirds,archery-world-tour,astray,bacon,bad-ice-cream,bad-ice-cream2,bad-ice-cream3,badtime-simulator,ball-blast,baldis-basics,basketball-line,basketball-stars,basketrandom,battery-run,battle-wheels,battleio,bear-on-bicycle,big-tower-tiny-square,bikerival,bitlife,bitplanes,blockuDoku,bloonstd4,bloonsTD5,bob-the-robber-2,bobbierobber,bomb-it-7,bottle-flip-3d,bounce-ball,boxing-physics-2,brain-test,breakout,breakingthebank,breaktheflash,burrito-bison,cannon-ball,car-rush,castle-of-magic,cell-craft,chaos-faction-2,checkers,cheeseswipe,chess,chicken-merge,clashroyale,climb-over-it,cluster-rush,coingo,cookieclicker,cooking-fast,creativekillchamber,crossyroad,cube-dash,cube-field,cubito,cursor-10,cuttherope,cyber-cars-punk-racing,death-run,defend-the-tank,defendthecastle,dice-wars,diepio,digdug,doge-miner,donkeykong,doodlejump,doom,draw-the-coffee,dreadheadparkour,drift-boss-2,driftboss,drive-mad,drivemad,ducklife,ducklife2,ducklife3,ducklife4,edge-not-found,eelix,elasticface,effing-worms,egg-car,electricman2,endless-tunnel,epic-basketball,escaperoad,escaperoad2,evowarsio,extreme-car-driving,factory-balls-forever,fancypants,fancypants2,fancypants3,feudalism,fireboy-watergirl,fireboy-watergirl2,fireboy-watergirl3,fireboy-watergirl4,fireboy-watergirl5,flip-bottle,flip-runner,football-legends,free-rider-hdw,frogger,funny-shooter-2,galaga,geometry-dash,geometrydash,geometrydashlite,get-away-shootout,getawayshootout,ghenghis,going-balls,gold-miner,gunmayhem,gunmayhem2,happy-wheels,happywheels,hardest-game,hextris,hoborpg,holeio,hover-craft,idle-breakout,idle-ants,idle-digging-tycoon,impossible-quiz,impossible-quiz2,infinity-superstars,interactivebuddy,iron-snout,jelly-truck,joust,jump-and-bounce,just-one-page,kart-fight,kingdomrush,learn-to-fly,learn-to-fly-2,linerider,little-big-snake,ludo,mad-truck-challenge,mahjong,mario-kart,master-chess,maze-planet-3d,merge-cakes,merge-cyber-racers,merge-round-racers,mine-clicker,minecraft,minesweeper,minigolf,missile-command,monkey-mart,monkeymart,monopoly,monster-tracks,moto-road-rash,moto-x3m,motox3m,motoX3M2,motoX3Mspooky,motoX3Mwinter,mutilate-a-doll-2,my-pony-my-little-race,neon-biker,ov0,ovo,pacman,paper-io-2,paperio2,papas-burgeria,papas-cheeseria,papas-freezeria,papas-pizzeria,papas-scooperia,papas-taco-mia,papasfreezeria,parking-fury,penalty-shooters-2,perfect-peel,pinball,pixel-gun-apocalypse-3,plague-inc,plants-vs-zombies,plantsvszombies,pocket-league-3d,pocket-ball,pokemon-fire-red,pokemon,poly-track,pool-club,pop-it-master,poptropica,potty-racers,puzzhead,qbert,ragdollarchers,raft-wars,raft-wars-2,ramp-car-stunts,react-arkanoid,retro-bowl,retrobowl,riddle-school,riddle-school-2,riddle-school-3,riddle-school-4,riddle-school-5,road-fury,roblox,rocket-soccer-derby,rooftop-snipers,rooftopsnipers,rowdy-wrestling,run-2,run-3,run3,scrabble,shell-shockers,shellshockers,shuttle-deck,sketch-star,sky-car-stunts,slither-io,slitherio,slope-2,slope-3,slope,slope3,smash-karts,snake,snowroad,snowrider,soccer-caps,soccer-skills,soccerrandom,solitaire,sonic-advance,sonic,space-invaders,spaceiskey,speed-pool-king,spider-solitaire,stack,star-wars-racer,stick-merge,stick-war,stickman-hook,subway-surfers,subwaysurfers,sudoku,super-mario-bros,supermario,supermechs,swords-and-sandals-2,swordsandsandals2,tank-trouble,tanks,tap-road,taproad,temple-run-2,templerun2,territorywar,tetris,the-binding-of-isaac,the-heist,the-impossible-quiz,the-impossible-quiz-2,the-spear-stickman,tictactoe,timeshooter2,tombraider,tombofthemask,total-recoil,tower-crush,tunnel-rush,ultimate-car-driving,unicyclehero,uno,vector,vex-4,vex-5,vex-6,vex-7,vex7,water-ragdoll-2,we-become-what-we-behold,who-is-lying,word-search,wordle,wormate-io,worms-zone,xa-car-racing,yohoho-io,zombs-royale";
 
-        let gamesList = [];
-
-        async function fetchGames() {
-            try {
-                const response = await fetch(`https://github.com{username}/${repoName}/contents/offline`);
-                if (!response.ok) throw new Error("API Limit");
-                const files = await response.json();
-                gamesList = files
-                    .filter(f => f.type === 'file' && (f.name.endsWith('.html') || f.name.endsWith('.htm')))
-                    .map(f => f.name);
-            } catch (error) {
-                console.log("API limit hit or blocked. Loading the master generator list directly...");
-                
-                // Full fallback list
-                gamesList = [
-                    "escaperoad.html", "escaperoad2.html", "geometrydashlite.html", "slope3.html", 
-                    "basketrandom.html", "slope.html", "taproad.html", "geometrydash.html", 
-                    "soccerrandom.htm", "driftboss.htm", "monkeymart.htm", "1v1.lol.html", 
-                    "2048.html", "ageofwar.html", "amongus.html", "bloonsTD5.html", "cookieclicker.htm"
-                ];
-
-                // Generates the remaining slots
-                for (let i = 1; i <= 300; i++) {
-                    gamesList.push(`game${i}.html`);
-                }
-            }
-            
-            // FIX: This section ensures the loading text hides and the games display under any condition
-            document.getElementById('loading-text').style.display = 'none';
-            document.getElementById('all-games-section').style.display = 'block';
-
-            loadAllGames();
-            loadMostPlayed();
-        }
+        // Full compilation of your specific .htm file exceptions
+        const htmList = [
+            "soccerrandom", "driftboss", "monkeymart", "bitplanes", "cookieclicker", 
+            "crossyroad", "dreadheadparkour", "drivemad", "elasticface", "getawayshootout", 
+            "get-away-shootout", "motox3m", "moto-x3m", "paperio2", "paper-io-2", 
+            "ragdollarchers", "rooftopsnipers", "rooftop-snipers", "snowroad", "snowrider", 
+            "templerun2", "temple-run-2", "timeshooter2", "tombofthemask"
+        ];
+        
+        const gamesList = rawGamesData.split(',').map(name => {
+            if (htmList.includes(name)) return name + ".htm";
+            return name + ".html";
+        });
 
         function formatGameName(filename) {
             let name = filename.replace('.html', '').replace('.htm', '');
-            if(name.startsWith('game')) {
-                return "Arcade Game " + name.replace('game', '');
-            }
             if(name === "1v1.lol") return "1v1.LOL";
-            if(name === "bloonsTD5") return "Bloons TD 5";
-            return name
-                .replace(/([A-Z])/g, ' $1')
-                .replace(/[_-]/g, ' ')
-                .trim()
-                .split(' ')
-                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-                .join(' ');
+            if(name.startsWith("bloons")) return name.toUpperCase().replace("TD", " TD ");
+            if(name.startsWith("motox3m") || name.startsWith("moto-x3m")) return "Moto X3M";
+            if(name === "paperio2" || name === "paper-io-2") return "Paper.io 2";
+            if(name === "templerun2" || name === "temple-run-2") return "Temple Run 2";
+            if(name === "timeshooter2") return "Time Shooter 2";
+            if(name === "tombofthemask") return "Tomb of the Mask";
+            return name.replace(/([A-Z])/g, ' $1').replace(/[_-]/g, ' ').trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
         }
 
         function recordPlay(gameFile) {
@@ -187,11 +76,7 @@
                 link.className = 'game-card';
                 link.href = `offline/${game}`;
                 link.onclick = () => recordPlay(game);
-                
-                link.innerHTML = `
-                    <span>${formatGameName(game)}</span>
-                    <span class="play-count">${count} plays</span>
-                `;
+                link.innerHTML = "<span>" + formatGameName(game) + "</span><span class='play-count'>" + count + " plays</span>";
                 grid.appendChild(link);
             });
         }
@@ -200,17 +85,10 @@
             const section = document.getElementById('most-played-section');
             const grid = document.getElementById('most-played-grid');
             grid.innerHTML = "";
-            
             let stats = JSON.parse(localStorage.getItem('arcade_stats')) || {};
-            let sortedGames = Object.keys(stats)
-                .filter(g => stats[g] > 0 && gamesList.includes(g))
-                .sort((a, b) => stats[b] - stats[a]);
+            let sortedGames = Object.keys(stats).filter(g => stats[g] > 0 && gamesList.includes(g)).sort((a, b) => stats[b] - stats[a]);
 
-            if (sortedGames.length === 0) {
-                section.style.display = "none";
-                return;
-            }
-
+            if (sortedGames.length === 0) { section.style.display = "none"; return; }
             section.style.display = "block";
             sortedGames.slice(0, 4).forEach(game => {
                 const link = document.createElement('a');
@@ -218,11 +96,7 @@
                 link.href = `offline/${game}`;
                 link.style.borderColor = '#ff9900';
                 link.onclick = () => recordPlay(game);
-                
-                link.innerHTML = `
-                    <span>${formatGameName(game)}</span>
-                    <span class="play-count" style="color:#ff9900;">🔥 ${stats[game]} plays</span>
-                `;
+                link.innerHTML = "<span>" + formatGameName(game) + "</span><span class='play-count' style='color:#ff9900;'>🔥 " + stats[game] + " plays</span>";
                 grid.appendChild(link);
             });
         }
@@ -235,7 +109,8 @@
             });
         }
 
-        fetchGames();
+        loadAllGames();
+        loadMostPlayed();
     </script>
 </body>
 </html>
