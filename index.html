@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThomasRhys Ultimate Offline Arcade</title>
+    <style>
+        body { font-family: sans-serif; background-color: #121212; color: #e0e0e0; text-align: center; padding: 20px; }
+        #search-bar { width: 90%; max-width: 500px; padding: 10px; margin-bottom: 20px; border-radius: 20px; border: 1px solid #333; }
+        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .game-card { background: #1e1e1e; padding: 20px; border-radius: 10px; text-decoration: none; color: #fff; transition: 0.3s; }
+        .game-card:hover { background: #333; }
+    </style>
+</head>
+<body>
+    <h1>Ultimate Web Arcade</h1>
+    <input type="text" id="search-bar" placeholder="Search games..." onkeyup="filterGames()">
+    <div class="game-grid" id="game-grid"></div>
+
+    <script>
+        // List of games from the repo, as seen in the referenced source
+        const gamesList = ["escaperoad.html", "geometrydashlite.html", "slope3.html", "1v1.lol.html", "2048.html", "ageofwar.html", "amongus.html", "bloonsTD5.html", "cookieclicker.htm", "driftboss.htm", "drivemad.htm"];
+        
+        const grid = document.getElementById('game-grid');
+        
+        function loadGames() {
+            gamesList.forEach(game => {
+                const link = document.createElement('a');
+                link.className = 'game-card';
+                link.href = `offline/${game}`;
+                link.textContent = game.replace('.html', '').replace(/([A-Z])/g, ' $1').trim();
+                grid.appendChild(link);
+            });
+        }
+
+        function filterGames() {
+            const input = document.getElementById('search-bar').value.toLowerCase();
+            document.querySelectorAll('.game-card').forEach(card => {
+                card.style.display = card.textContent.toLowerCase().includes(input) ? "" : "none";
+            });
+        }
+        loadGames();
+    </script>
+</body>
+</html>
