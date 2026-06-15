@@ -5,41 +5,212 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ThomasRhys Ultimate Offline Arcade</title>
     <style>
-        body { font-family: sans-serif; background-color: #121212; color: #e0e0e0; text-align: center; padding: 20px; }
-        #search-bar { width: 90%; max-width: 500px; padding: 10px; margin-bottom: 20px; border-radius: 20px; border: 1px solid #333; }
-        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .game-card { background: #1e1e1e; padding: 20px; border-radius: 10px; text-decoration: none; color: #fff; transition: 0.3s; }
-        .game-card:hover { background: #333; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            text-align: center;
+            margin: 0;
+            padding: 40px 20px;
+        }
+        h1 {
+            color: #00ffcc;
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+        h2 {
+            color: #ff9900;
+            text-align: left;
+            max-width: 1200px;
+            margin: 30px auto 15px auto;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+        }
+        .subtitle {
+            color: #a0a0a0;
+            margin-bottom: 30px;
+        }
+        #search-bar {
+            width: 90%;
+            max-width: 500px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 25px;
+            border: 1px solid #333;
+            background-color: #1e1e1e;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        #search-bar:focus {
+            border-color: #00ffcc;
+        }
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .game-card {
+            background: linear-gradient(145deg, #1e1e1e, #252525);
+            padding: 25px 15px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: 1px solid #333;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 90px;
+            box-sizing: border-box;
+        }
+        .game-card:hover {
+            transform: translateY(-3px);
+            border-color: #00ffcc;
+            background: #252525;
+            color: #00ffcc;
+        }
+        .play-count {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 8px;
+            font-weight: normal;
+        }
+        #most-played-section {
+            display: none; /* Hidden by default until games are played */
+        }
     </style>
 </head>
 <body>
-    <h1>Ultimate Web Arcade</h1>
-    <input type="text" id="search-bar" placeholder="Search games..." onkeyup="filterGames()">
-    <div class="game-grid" id="game-grid"></div>
+
+    <h1>🕹️ Ultimate Web Arcade</h1>
+    <p class="subtitle">Select a game to start playing directly in your browser.</p>
+
+    <input type="text" id="search-bar" placeholder="🔍 Search games..." onkeyup="filterGames()">
+
+    <!-- Most Played Section -->
+    <div id="most-played-section">
+        <h2>🔥 Most Played</h2>
+        <div class="game-grid" id="most-played-grid"></div>
+    </div>
+
+    <!-- All Games Section -->
+    <h2>🎮 All Games</h2>
+    <div class="game-grid" id="all-games-grid"></div>
 
     <script>
-        // List of games from the repo, as seen in the referenced source
-        const gamesList = ["escaperoad.html", "geometrydashlite.html", "slope3.html", "1v1.lol.html", "2048.html", "ageofwar.html", "amongus.html", "bloonsTD5.html", "cookieclicker.htm", "driftboss.htm", "drivemad.htm"];
+        // Complete current list of games from your directory setup
+        const gamesList = [
+            "escaperoad.html", "escaperoad2.html", "geometrydashlite.html", "slope3.html", 
+            "basketrandom.html", "slope.html", "taproad.html", "geometrydash.html", 
+            "soccerrandom.htm", "driftboss.htm", "monkeymart.htm"
+        ];
         
-        const grid = document.getElementById('game-grid');
-        
-        function loadGames() {
-            gamesList.forEach(game => {
+        // Clean up filenames into beautiful titles (e.g., "escaperoad.html" -> "Escape Road")
+        function formatGameName(filename) {
+            let name = filename.split('.')[0]; // remove extension
+            
+            // Capitalize specific known titles neatly
+            if(name === "escaperoad") return "Escape Road";
+            if(name === "escaperoad2") return "Escape Road 2";
+            if(name === "geometrydashlite") return "Geometry Dash Lite";
+            if(name === "geometrydash") return "Geometry Dash";
+            if(name === "basketrandom") return "Basket Random";
+            if(name === "soccerrandom") return "Soccer Random";
+            if(name === "driftboss") return "Drift Boss";
+            if(name === "monkeymart") return "Monkey Mart";
+            if(name === "taproad") return "Tap Road";
+            if(name === "slope3") return "Slope 3";
+            
+            // Fallback: capitalize first letter
+            return name.charAt(0).toUpperCase() + name.slice(1);
+        }
+
+        // Track a game click and save to localStorage
+        function recordPlay(gameFile) {
+            let stats = JSON.parse(localStorage.getItem('arcade_stats')) || {};
+            stats[gameFile] = (stats[gameFile] || 0) + 1;
+            localStorage.setItem('arcade_stats', JSON.stringify(stats));
+        }
+
+        // Generate the standard "All Games" grid
+        function loadAllGames() {
+            const grid = document.getElementById('all-games-grid');
+            let stats = JSON.parse(localStorage.getItem('arcade_stats')) || {};
+            
+            gamesList.sort().forEach(game => {
+                const count = stats[game] || 0;
+                
                 const link = document.createElement('a');
                 link.className = 'game-card';
                 link.href = `offline/${game}`;
-                link.textContent = game.replace('.html', '').replace(/([A-Z])/g, ' $1').trim();
+                link.onclick = () => recordPlay(game);
+                
+                link.innerHTML = `
+                    <span>${formatGameName(game)}</span>
+                    <span class="play-count">${count} plays</span>
+                `;
                 grid.appendChild(link);
             });
         }
 
-        function filterGames() {
-            const input = document.getElementById('search-bar').value.toLowerCase();
-            document.querySelectorAll('.game-card').forEach(card => {
-                card.style.display = card.textContent.toLowerCase().includes(input) ? "" : "none";
+        // Generate the pinned "Most Played" grid dynamically based on click history
+        function loadMostPlayed() {
+            const section = document.getElementById('most-played-section');
+            const grid = document.getElementById('most-played-grid');
+            grid.innerHTML = ""; // Clear grid refresh
+            
+            let stats = JSON.parse(localStorage.getItem('arcade_stats')) || {};
+            
+            // Sort games based on play counts, filtering out games with 0 plays
+            let sortedGames = Object.keys(stats)
+                .filter(game => stats[game] > 0 && gamesList.includes(game))
+                .sort((a, b) => stats[b] - stats[a]);
+
+            // If no games have been played yet, keep the top section hidden
+            if (sortedGames.length === 0) {
+                section.style.display = "none";
+                return;
+            }
+
+            section.style.display = "block";
+            
+            // Take the top 4 most played games to pin
+            sortedGames.slice(0, 4).forEach(game => {
+                const link = document.createElement('a');
+                link.className = 'game-card';
+                link.href = `offline/${game}`;
+                link.style.borderColor = '#ff9900'; // Special orange border for favorites
+                link.onclick = () => recordPlay(game);
+                
+                link.innerHTML = `
+                    <span>${formatGameName(game)}</span>
+                    <span class="play-count" style="color:#ff9900;">🔥 ${stats[game]} plays</span>
+                `;
+                grid.appendChild(link);
             });
         }
-        loadGames();
+
+        // Search Bar feature
+        function filterGames() {
+            const input = document.getElementById('search-bar').value.toLowerCase();
+            document.querySelectorAll('#all-games-grid .game-card').forEach(card => {
+                const name = card.querySelector('span').textContent.toLowerCase();
+                card.style.display = name.includes(input) ? "" : "none";
+            });
+        }
+
+        // Run setup on page load
+        loadAllGames();
+        loadMostPlayed();
     </script>
 </body>
 </html>
