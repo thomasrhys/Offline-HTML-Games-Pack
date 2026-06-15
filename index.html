@@ -115,7 +115,7 @@
 
     <div id="loading-text" class="loading">🔄 Scanning your game vault...</div>
 
-            <script>
+    <script>
         const username = "thomasrhys";
         const repoName = "Offline-HTML-Games-Pack";
 
@@ -123,7 +123,6 @@
 
         async function fetchGames() {
             try {
-                // This connects to your online repo and reads all 300+ games automatically in 1 second!
                 const response = await fetch(`https://github.com{username}/${repoName}/contents/offline`);
                 if (!response.ok) throw new Error("API Limit");
                 const files = await response.json();
@@ -131,10 +130,9 @@
                     .filter(f => f.type === 'file' && (f.name.endsWith('.html') || f.name.endsWith('.htm')))
                     .map(f => f.name);
             } catch (error) {
-                console.log("API limit hit! Using the automatic massive catalog loop generator...");
+                console.log("API limit hit or blocked. Loading the master generator list directly...");
                 
-                // BULLETPROOF FALLBACK GENERATOR:
-                // If the API drops, this list instantly generates all your core games + your entire library numbers!
+                // Full fallback list
                 gamesList = [
                     "escaperoad.html", "escaperoad2.html", "geometrydashlite.html", "slope3.html", 
                     "basketrandom.html", "slope.html", "taproad.html", "geometrydash.html", 
@@ -142,12 +140,16 @@
                     "2048.html", "ageofwar.html", "amongus.html", "bloonsTD5.html", "cookieclicker.htm"
                 ];
 
-                // Auto-generates the remaining 300 sequential game slots matching the offline pack structure
+                // Generates the remaining slots
                 for (let i = 1; i <= 300; i++) {
                     gamesList.push(`game${i}.html`);
                 }
             }
             
+            // FIX: This section ensures the loading text hides and the games display under any condition
+            document.getElementById('loading-text').style.display = 'none';
+            document.getElementById('all-games-section').style.display = 'block';
+
             loadAllGames();
             loadMostPlayed();
         }
