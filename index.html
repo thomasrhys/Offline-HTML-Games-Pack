@@ -51,11 +51,16 @@
             let name = filename.replace('.html', '').replace('.htm', '');
             if(name === "1v1.lol") return "1v1.LOL";
             if(name.startsWith("bloons")) return name.toUpperCase().replace("TD", " TD ");
-            if(name.startsWith("motox3m") || name.startsWith("moto-x3m")) return "Moto X3M";
+            if(name === "motox3m") return "Moto X3M";
             if(name === "paperio2" || name === "paper-io-2") return "Paper.io 2";
             if(name === "templerun2" || name === "temple-run-2") return "Temple Run 2";
             if(name === "timeshooter2") return "Time Shooter 2";
             if(name === "tombofthemask") return "Tomb of the Mask";
+            if(name === "motox3m3") return "Moto X3M 3";
+            if(name === "motox3m2") return "Moto X3M 2";
+            if(name === "motox3mpoolparty") return "Moto X3M Pool Party";
+            if(name === "motox3mspookyland") return "Moto X3M Spooky Land";
+            if(name === "motox3mwinter") return "Moto X3M Winter";
             return name.replace(/([A-Z])/g, ' $1').replace(/[_-]/g, ' ').trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
         }
 
